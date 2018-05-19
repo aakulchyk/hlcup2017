@@ -73,8 +73,13 @@ void client_session(socket_ptr sock) {
             case UrlParser::GET_USER_VISITS: {
                 User u;
                 if (storage->user(id, u)) {
-                    auto conditions = UrlParser::instance().extractGetParams(request);
-                    content["visits"] = storage->userVisits(id, conditions);
+                    bool paramsValid;
+                    auto conditions = UrlParser::instance().extractGetParams(request, paramsValid);
+
+                    if (paramsValid)
+                        content["visits"] = storage->userVisits(id, conditions);
+                    else
+                        code = 400;
                 }
                 else
                     code = 404;
@@ -83,8 +88,12 @@ void client_session(socket_ptr sock) {
             case UrlParser::GET_LOCATION_AVG_RATE: {
                 Location l;
                 if (storage->location(id, l)) {
-                    auto conditions = UrlParser::instance().extractGetParams(request);
-                    content["avg"] = storage->locationAvgRate(id, conditions);
+                    bool paramsValid;
+                    auto conditions = UrlParser::instance().extractGetParams(request, paramsValid);
+                    if (paramsValid)
+                        content["avg"] = storage->locationAvgRate(id, conditions);
+                    else
+                        code = 400;
                 }
                 else
                     code = 404;

@@ -54,23 +54,43 @@ public:
         }
     }
 
-    struct Condition {
-      std::string param;
-      std::string val;
-      //Contidion(std::string a1, std::string a2, std::string a3)
-      //    : param(a1), comp(a2), val(a3) {}
-    };
-
     using ConditionMap = std::map<std::string, std::string>;
 
-    ConditionMap extractGetParams(std::string input) {
+    ConditionMap extractGetParams(std::string input, bool& valid) {
         try {
             ConditionMap result;
             std::smatch match;
 
-            std::cout << "input: " << input << std::endl;
+            valid = true;
 
             while (regex_search(input, match, regex_get_params)) {
+                std::string paramName = match[1];
+                std::string paramValue = match[2];
+                if (paramValue.empty())
+                    valid = false;
+
+                if (paramName == "gender") {
+                    if (paramValue != "m" && paramValue != "f")
+                        valid = false;
+                }
+                else if (paramName == "country") {
+                   if (paramValue.length() > 50)
+                       valid = false;
+                }
+                else {
+                    // all the rest parameters are integer - check
+                    std::regex re("-?[0-9]+");
+                    std::smatch m;
+                    if (!regex_match(paramValue, m, re))
+                        valid = false;
+
+                    try {
+                        long int dummy = std::stoi(paramValue);
+                    }
+                    catch (std:: exception& e) {
+                        valid = false;
+                    }
+                }
                 result.insert(std::make_pair(match[1], match[2]));
                 input = match.suffix().str();
             }
@@ -105,7 +125,7 @@ private:
         regex_map[CREATE_LOCATION] = "POST[[:space:]]/locations/new";
 
         //regex_get_params = "[\\?\\&]([^\\&]+)";
-        regex_get_params = "[\\?\\&]([[:alpha:]]+)=([[:alnum:]]+)";
+        regex_get_params = "[\\?\\&]([[:alpha:]]+)=([[:alnum:]]*)";
     }
 
     static UrlParser *_instance;

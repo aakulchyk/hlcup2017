@@ -18,7 +18,8 @@ void test_extract_json() {
 
 void test_extract_get_params() {
     std::string s1 = "/users/1/visits?toDate=234555&fromDate=1223445&toDistange=345";
-    auto parVal = UrlParser::instance().extractGetParams(s1);
+    bool paramsValid;
+    auto parVal = UrlParser::instance().extractGetParams(s1, paramsValid);
 
     for (auto pr : parVal) {
         std::cout << pr.first << " " << pr.second << std::endl;
