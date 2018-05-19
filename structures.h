@@ -17,13 +17,11 @@ struct User {
 
     bool _isSet_ = false;
     User() {}
-    User(json& o);
-
     static bool validate(json o);
-
-    void from_json(json o);
-    json to_json();
 };
+
+void from_json(const json&, User&);
+void to_json(json&, const User&);
 
 struct Location {
     unsigned int id = 0;
@@ -35,13 +33,12 @@ struct Location {
     bool _isSet_ = false;
 
     Location() {}
-    Location(json& o);
 
     static bool validate(json o);
-
-    void from_json(json o);
-    json to_json();
 };
+
+void from_json(const json&, Location&);
+void to_json(json&, const Location&);
 
 struct Visit {
     unsigned int id = 0;
@@ -53,10 +50,9 @@ struct Visit {
     bool _isSet_ = false;
 
     Visit() {}
-    Visit(json& o);
 
     static bool validate(json o);
-
-    void from_json(json o);
-    json to_json();
 };
+
+void from_json(const json&, Visit&);
+void to_json(json&, const Visit&);

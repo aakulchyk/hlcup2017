@@ -1,12 +1,8 @@
 #include "structures.h"
+
+#include <iostream>
 #include <regex>
 
-User::User(json &o) {
-    if (!o.empty()) {
-        from_json(o);
-        _isSet_ = true;
-    }
-}
 
 bool User::validate(json o) {
     try {
@@ -40,140 +36,183 @@ bool User::validate(json o) {
             dummy = o["birth_date"];
         }
 
+        return true;
     }
-    catch (.../*const std::invalid_argument& ia*/) {
-        std::cerr << "User::validate "  << e.what() << std::endl;
+    catch (const std::exception& e) {
+        std::cerr << "User::validate: "  << e.what() << std::endl;
         return false;
     }
 }
 
-void User::from_json(json o) {
+void from_json(const json& o, User& user) {
     // TODO: check json on correctness
     try {
         if (!User::validate(o))
             throw std::invalid_argument("validation failed.");
 
         if (o.find("id") != o.end())
-            id = o["id"];
+            user.id = o["id"];
 
         if (o.find("email") != o.end())
-            email = o["email"];
+            user.email = o["email"];
         if (o.find("first_name") != o.end())
-            first_name = o["first_name"];
+            user.first_name = o["first_name"];
         if (o.find("last_name") != o.end())
-            last_name = o["last_name"];
+            user.last_name = o["last_name"];
         if (o.find("gender") != o.end())
-            gender = o["gender"];
+            user.gender = o["gender"];
         if (o.find("birth_date") != o.end())
-            birth_date = o["birth_date"];
+            user.birth_date = o["birth_date"];
     } catch (std::exception& e) {
         std::cerr << "User::from_json "  << e.what() << std::endl;
     }
 }
 
-json User::to_json() {
+void to_json(json& o, const User& user) {
     try {
-        json o;
-        o["id"] = id;
-        o["email"] = email;
-        o["first_name"] = first_name;
-        o["last_name"] = last_name;
-        o["gender"] = gender;
-        o["birth_date"] = birth_date;
-
-        return o;
+        o["id"] = user.id;
+        o["email"] = user.email;
+        o["first_name"] = user.first_name;
+        o["last_name"] = user.last_name;
+        o["gender"] = user.gender;
+        o["birth_date"] = user.birth_date;
     } catch (std::exception& e) {
         std::cerr << "User::to_json "  << e.what() << std::endl;
     }
 }
 
-Location::Location(json &o) {
-    if (!o.empty()) {
-        from_json(o);
-        _isSet_ = true;
+bool Location::validate(json o)
+{
+    try {
+        long int dummy;
+        if (o.find("id") != o.end()) {
+            dummy = o["id"];
+        }
+        if (o.find("place") != o.end()) {
+            std::string s = o["email"];
+        }
+        if (o.find("country") != o.end()) {
+            std::string s = o["country"];
+            if (s.length() < 1 || s.length() > 50)
+                throw std::invalid_argument("country is incorrect");
+        }
+        if (o.find("city") != o.end()) {
+            std::string s = o["city"];
+            if (s.length() < 1 || s.length() > 50)
+                throw std::invalid_argument("city is incorrect");
+        }
+
+        if (o.find("distance") != o.end()) {
+            dummy = o["distance"];
+            if (dummy < 0)
+                throw std::invalid_argument("distance is invalid");
+        }
+
+        return true;
+    }
+    catch (const std::exception& e) {
+        std::cerr << "User::validate: "  << e.what() << std::endl;
+        return false;
     }
 }
 
-bool Location::validate(json o)
-{
-    return true;
-}
 
-void Location::from_json(json o) {
+void from_json(const json& o, Location& location) {
     try {
         // TODO: check json on correctness
         if (o.find("id") != o.end())
-            id = o["id"];
+            location.id = o["id"];
 
         if (o.find("place") != o.end())
-            place = o["place"];
+            location.place = o["place"];
         if (o.find("country") != o.end())
-            country = o["country"];
+            location.country = o["country"];
         if (o.find("city") != o.end())
-            city = o["city"];
+            location.city = o["city"];
         if (o.find("distance") != o.end())
-            distance = o["distance"];
+            location.distance = o["distance"];
     } catch (std::exception& e) {
         std::cerr << "Location::from_json "  << e.what() << std::endl;
     }
 }
 
-json Location::to_json() {
+void to_json(json& o, const Location& location) {
     try {
-        json o;
-        o["id"] = id;
-        o["place"] = place;
-        o["country"] = country;
-        o["city"] = city;
-        o["distance"] = distance;
-
-        return o;
+        o["id"] = location.id;
+        o["place"] = location.place;
+        o["country"] = location.country;
+        o["city"] = location.city;
+        o["distance"] = location.distance;
     } catch (std::exception& e) {
         std::cerr << "Location::to_json "  << e.what() << std::endl;
     }
 }
 
-Visit::Visit(json &o) {
-    if (!o.empty()) {
-        from_json(o);
-        _isSet_ = true;
+bool Visit::validate(json o)
+{
+    try {
+        long int dummy;
+        if (o.find("id") != o.end()) {
+            dummy = o["id"];
+            if (dummy < 0) throw std::invalid_argument("id is invalid");
+
+        }
+
+        if (o.find("location") != o.end()) {
+            dummy = o["location"];
+            if (dummy < 0) throw std::invalid_argument("location is invalid");
+
+        }
+
+        if (o.find("user") != o.end()) {
+            dummy = o["user"];
+            if (dummy < 0) throw std::invalid_argument("user is invalid");
+
+        }
+        if (o.find("visited_at") != o.end()) {
+            dummy = o["visited_at"];
+            if (dummy < 0) throw std::invalid_argument("visited_at is invalid");
+
+        }
+
+        if (o.find("mark") != o.end()) {
+            dummy = o["mark"];
+            if (dummy < 0) throw std::invalid_argument("mark is invalid");
+        }
+
+        return true;
+    }
+    catch (const std::exception& e) {
+        std::cerr << "User::validate: "  << e.what() << std::endl;
+        return false;
     }
 }
 
-bool Visit::validate(json o)
-{
-    return true;
-}
-
-void Visit::from_json(json o) {
-    // TODO: check json on correctness
+void from_json(const json& o, Visit& visit) {
     try {
         if (o.find("id") != o.end())
-            id = o["id"];
+            visit.id = o["id"];
 
         if (o.find("location") != o.end())
-            location = o["location"];
+            visit.location = o["location"];
         if (o.find("user") != o.end())
-            user = o["user"];
+            visit.user = o["user"];
         if (o.find("visited_at") != o.end())
-            visited_at = o["visited_at"];
+            visit.visited_at = o["visited_at"];
         if (o.find("mark") != o.end())
-            mark = o["mark"];
+            visit.mark = o["mark"];
     } catch (std::exception& e) {
         std::cerr << "Visit::from_json "  << e.what() << std::endl;
     }
 }
 
-json Visit::to_json() {
+void to_json(json& o, const Visit& visit) {
     try {
-        json o;
-        o["id"] = id;
-        o["location"] = location;
-        o["user"] = user;
-        o["visited_at"] = visited_at;
-        o["mark"] = mark;
-
-        return o;
+        o["id"] = visit.id;
+        o["location"] = visit.location;
+        o["user"] = visit.user;
+        o["visited_at"] = visit.visited_at;
+        o["mark"] = visit.mark;
     } catch (std::exception& e) {
         std::cerr << "Visit::to_json "  << e.what() << std::endl;
     }

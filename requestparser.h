@@ -4,6 +4,7 @@
 #include <regex>
 #include <string>
 #include <map>
+#include <utility>
 
 class UrlParser {
 
@@ -53,6 +54,34 @@ public:
         }
     }
 
+    struct Condition {
+      std::string param;
+      std::string val;
+      //Contidion(std::string a1, std::string a2, std::string a3)
+      //    : param(a1), comp(a2), val(a3) {}
+    };
+
+    using ConditionMap = std::map<std::string, std::string>;
+
+    ConditionMap extractGetParams(std::string input) {
+        try {
+            ConditionMap result;
+            std::smatch match;
+
+            std::cout << "input: " << input << std::endl;
+
+            while (regex_search(input, match, regex_get_params)) {
+                result.insert(std::make_pair(match[1], match[2]));
+                input = match.suffix().str();
+            }
+
+            return result;
+        }
+        catch (std::exception& e) {
+            std::cout << "extractGetParams: " << e.what() << std::endl;
+        }
+    }
+
     static UrlParser& instance() {
         static UrlParser inst;
         return inst;
@@ -75,10 +104,13 @@ private:
         regex_map[CREATE_VISIT] = "POST[[:space:]]/visits/new";
         regex_map[CREATE_LOCATION] = "POST[[:space:]]/locations/new";
 
+        //regex_get_params = "[\\?\\&]([^\\&]+)";
+        regex_get_params = "[\\?\\&]([[:alpha:]]+)=([[:alnum:]]+)";
     }
 
     static UrlParser *_instance;
     std::map<RequestType, std::regex> regex_map;
+    std::regex regex_get_params;
 };
 
 UrlParser *UrlParser::_instance = nullptr;

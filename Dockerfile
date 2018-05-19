@@ -1,15 +1,19 @@
 FROM ubuntu:16.04
 
-WORKDIR /root
+WORKDIR /home/aliaksandr/sandbox/hlcup2017
 
 RUN apt-get -qq update
 RUN apt-get install g++ make -y
 RUN apt-get install -qq libboost-all-dev -y
 RUN apt-get install sqlite3 -y
+RUN apt-get install cmake -y
 
-ADD . .
 
-#COPY main.cpp storage Makefile data /root/
+#RUN mkdir /alex
+COPY . .
+#COPY *.cpp *.h storage Makefile Dockerfile /alex
+RUN rm -rf CMakeFiles
+RUN cmake .
 RUN make -f Makefile
 
 

@@ -1,8 +1,11 @@
 #include <algorithm>
 #include <fstream>
 #include <iostream>
-
+#include <mutex>
+#include <ctime>
 #include "storage.h"
+
+std::mutex storage_mutex;  // protects storage
 
 JsonStorage::JsonStorage()
 {
@@ -26,43 +29,135 @@ JsonStorage::JsonStorage()
 }
 
 
-User JsonStorage::user(Id id) {
-    auto o = findById(_users, id);
-    return User(o);
+bool JsonStorage::user(Id id, User& o) {
+    return getStruct<User>(id, _users, o);
+/*    bool ret = false;
+    auto it = findById(_users, id);
+    if (it != _users.end()) {
+        o = *it;
+        ret = true;
+    }
+    return ret;*/
 }
 
-Location JsonStorage::location(Id id) {
-    auto o = findById(_locations, id);
-    return Location(o);
+bool JsonStorage::location(Id id, Location& o) {
+    return getStruct<Location>(id, _locations, o);
+/*    bool ret = false;
+    auto it = findById(_locations, id);
+    if (it != _locations.end()) {
+        o = *it;
+        ret = true;
+    }
+    return ret;*/
 }
 
-Visit JsonStorage::visit(Id id) {
-    auto o = findById(_visits, id);
-    return Visit(o);
+bool JsonStorage::visit(Id id, Visit& o) {
+    return getStruct<Visit>(id, _visits, o);
+/*    bool ret = false;
+    auto it = findById(_visits, id);
+    if (it != _visits.end()) {
+        o = *it;
+        ret = true;
+    }
+    return ret;*/
 }
 
-json JsonStorage::userVisits(Id id)
+json JsonStorage::userVisits(Id id, ConditionMap conditions)
 {
     json visits;
     for (auto v : _visits) {
-        if (v.empty()) continue;
-        if (v["user"] == id)
-            visits.push_back(v);
+        if (v.empty())
+            continue;
+        if (v["user"] != id)
+            continue;
+
+        if (conditions.find("fromDate") != conditions.end()) {
+            time_t fromDate = static_cast<time_t>(std::stoi(conditions["fromDate"]));
+            if (static_cast<time_t>(v["visited_at"]) <= fromDate)
+                continue;
+        }
+
+        if (conditions.find("toDate") != conditions.end()) {
+            time_t fromDate = static_cast<time_t>(std::stoi(conditions["toDate"]));
+            if (static_cast<time_t>(v["visited_at"]) >= fromDate)
+                continue;
+        }
+
+        Location visitLocation;
+        int locationId = v["location"];
+        if (false == location(locationId, visitLocation))
+            continue;
+
+        if (conditions.find("country") != conditions.end()) {
+            std::string visitCountry  = conditions["country"];
+            if (visitCountry != visitLocation.country)
+                continue;
+        }
+
+        if (conditions.find("toDistance") != conditions.end()) {
+            long toDistance = std::stoi(conditions["toDistance"]);
+            if (toDistance >= visitLocation.distance)
+                continue;
+        }
+
+        visits.push_back(v);
     }
 
     return visits;
 }
 
-double JsonStorage::locationAvgRate(Id id)
+double JsonStorage::locationAvgRate(Id id, ConditionMap conditions)
 {
-    double rate;
+    double rate = 0;
     int count = 0;
     for (auto v : _visits) {
         if (v.empty()) continue;
-        if (v["location"] == id) {
-            rate += static_cast<double>(v["mark"]);
-            count++;
+        if (v["location"] != id)
+            continue;
+
+
+        if (conditions.find("fromDate") != conditions.end()) {
+            time_t fromDate = static_cast<time_t>(std::stoi(conditions["fromDate"]));
+            if (static_cast<time_t>(v["visited_at"]) <= fromDate)
+                continue;
         }
+
+        if (conditions.find("toDate") != conditions.end()) {
+            time_t fromDate = static_cast<time_t>(std::stoi(conditions["toDate"]));
+            if (static_cast<time_t>(v["visited_at"]) >= fromDate)
+                continue;
+        }
+
+        User visitUser;
+        int userId = v["user"];
+        if  (false == user(userId, visitUser))
+            continue;
+
+        if (conditions.find("fromAge") != conditions.end()) {
+            int fromAge = std::stoi(conditions["fromAge"]);
+            int userAge = std::time(0) - visitUser.birth_date;
+
+            if (userAge <= fromAge)
+                continue;
+        }
+
+        if (conditions.find("toAge") != conditions.end()) {
+            int toAge = std::stoi(conditions["toAge"]);
+            int userAge = std::time(0) - visitUser.birth_date;
+
+            if (userAge >= toAge)
+                continue;
+        }
+
+        if (conditions.find("gender") != conditions.end()) {
+            std::string visitGender = conditions["gender"];
+            if (visitGender != visitUser.gender)
+                continue;
+        }
+
+        rate += static_cast<double>(v["mark"]);
+        count++;
+
     }
 
     rate /= count;
@@ -72,25 +167,27 @@ double JsonStorage::locationAvgRate(Id id)
 
 bool JsonStorage::updateUser(Id id, json uuser)
 {
-    auto user = findById(_users, id);
-    return updateStruct(user, id, uuser);
+    std::lock_guard<std::mutex> lock(storage_mutex);
+    auto it = findById(_users, id);
+    return it != _users.end() ? updateStruct(*it, id, uuser) : false;
 }
 
 bool JsonStorage::updateLocation(Id id, json ulocation)
 {
-    auto location = findById(_locations, id);
-    return updateStruct(location, id, ulocation);
+    std::lock_guard<std::mutex> lock(storage_mutex);
+    auto it = findById(_locations, id);
+    return it != _locations.end() ? updateStruct(*it, id, ulocation) : false;
 }
 
 bool JsonStorage::updateVisit(Id id, json uvisit)
 {
-    auto visit = findById(_visits, id);
-    return updateStruct(visit, id, uvisit);
+    std::lock_guard<std::mutex> lock(storage_mutex);
+    auto it = findById(_visits, id);
+    return it != _visits.end() ? updateStruct(*it, id, uvisit) : false;
 }
 
-json& JsonStorage::findById(json objects, Id id) {
-    auto it = std::find_if(objects.begin(), objects.end(), [id](const json& o) { return o["id"] == id; });
-    return it != objects.end() ? *it : json();
+json::iterator JsonStorage::findById(json& objects, Id id) {
+    return std::find_if(objects.begin(), objects.end(), [id](const json& o) { return o["id"] == id; });;
 }
 
 bool JsonStorage::updateStruct(json &_struct, Id id, const json& newObj)

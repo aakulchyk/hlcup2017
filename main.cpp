@@ -9,6 +9,8 @@
 #include <stdlib.h>
 #include <boost/array.hpp>
 
+#include <boost/locale/encoding_utf.hpp>
+
 #include "storage.h"
 #include "requestparser.h"
 #include "nlohmann/json.hpp"
@@ -20,6 +22,11 @@ io_service service;
 
 AbstractStorage *storage;
 
+std::map<int, std::string> status = {
+    {200, "200 OK"},
+    {400, "400 Bad Request"},
+    {404, "404 Not Found"}};
+
 void client_session(socket_ptr sock) {
     std::cout << "new client session" << std::endl;
 
@@ -29,8 +36,7 @@ void client_session(socket_ptr sock) {
     boost::system::error_code error;
     unsigned int id = 0;
     json content;
-    //std::string status_code("200 OK");
-    int status_code = 200;
+    int code = 200;
     try {
         size_t len = sock->read_some(buffer(buf), error);
         std::string request(buf.data());
@@ -38,57 +44,68 @@ void client_session(socket_ptr sock) {
 
         std::cout << "REQUEST: " << std::endl << buf.data() << std::endl
                   << "---------------" << std::endl;
-        //std::cout << "TYPE: " << requestType << std::endl;
-
-        bool request_correct = false;
 
         switch (requestType) {
             case UrlParser::GET_USER: {
-                content = storage->user(id).to_json();
-                if (content.empty())
-                    status_code = 404;
+                User u;
+                if (storage->user(id, u))
+                    content = u;
+                else
+                    code = 404;
                 break;
             }
             case UrlParser::GET_LOCATION: {
-                content = storage->location(id).to_json();
-                if (content.empty())
-                    status_code = 404;
+                Location l;
+                if (storage->location(id, l))
+                    content = l;
+                else
+                    code = 404;
                 break;
             }
             case UrlParser::GET_VISIT: {
-                content = storage->visit(id).to_json();
-                if (content.empty())
-                    status_code = 404;
+                Visit v;
+                if (storage->visit(id, v))
+                    content = v;
+                else
+                    code = 404;
                 break;
             }
             case UrlParser::GET_USER_VISITS: {
-                content["visits"] = storage->userVisits(id);
-                if (content.empty())
-                    status_code = 404;
+                User u;
+                if (storage->user(id, u)) {
+                    auto conditions = UrlParser::instance().extractGetParams(request);
+                    content["visits"] = storage->userVisits(id, conditions);
+                }
+                else
+                    code = 404;
                 break;
             }
             case UrlParser::GET_LOCATION_AVG_RATE: {
-                content["avg"] = storage->locationAvgRate(id);
-                if (static_cast<double>(content["avg"]) < 0.1)
-                    status_code = 404;
+                Location l;
+                if (storage->location(id, l)) {
+                    auto conditions = UrlParser::instance().extractGetParams(request);
+                    content["avg"] = storage->locationAvgRate(id, conditions);
+                }
+                else
+                    code = 404;
                 break;
             }
             case UrlParser::UPDATE_USER: {
                 json user = UrlParser::instance().extractJson(request);
                 if (User::validate(user))
-                    status_code = storage->updateUser(id, user) ? 200 : 404;
+                    code = storage->updateUser(id, user) ? 200 : 404;
                 else
-                    status_code = 400;
+                    code = 400;
                 break;
             }
             case UrlParser::UPDATE_LOCATION: {
                 json location = UrlParser::instance().extractJson(request);
-                status_code = storage->updateLocation(id, location) ? 200 : 404;
+                code = storage->updateLocation(id, location) ? 200 : 404;
                 break;
             }
             case UrlParser::UPDATE_VISIT: {
                 json visit = UrlParser::instance().extractJson(request);
-                status_code = storage->updateVisit(id, visit) ? 200 : 404;
+                code = storage->updateVisit(id, visit) ? 200 : 404;
                 break;
             }
             case UrlParser::CREATE_USER:
@@ -96,19 +113,20 @@ void client_session(socket_ptr sock) {
             case UrlParser::CREATE_VISIT:
                 break;
             default:
-                status_code = 400;
+                code = 400;
         }
     }
     catch (std::exception& e) {
         std::cerr << "1 "  << e.what() << std::endl;
     }
 
+    std::string dump = content.dump();
     std::stringstream ss;
-    ss << "HTTP/1.1 " << status_code << "\nContent-Length: "
-       << content.dump().size()
+    ss << "HTTP/1.1 " << status[code]
+       << "\nContent-Length: " << dump.size()
        << "\nContent-Type: text/json; charset=utf-8"
-       << "\n\n"
-       << content;
+       << std::endl << std::endl
+       << dump;
 
     std::cout << std::endl << "RESPONSE: " << std::endl << ss.str() << std::endl
               << "---------------" << std::endl;;
