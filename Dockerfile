@@ -7,6 +7,7 @@ RUN apt-get install g++ make -y
 RUN apt-get install -qq libboost-all-dev -y
 RUN apt-get install sqlite3 -y
 RUN apt-get install cmake -y
+RUN apt-get install unzip -y
 
 
 #RUN mkdir /alex
@@ -15,7 +16,7 @@ COPY . .
 RUN rm -rf CMakeFiles
 RUN cmake .
 RUN make -f Makefile
-
+RUN rm -f data/*
 
 EXPOSE 80
 

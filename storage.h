@@ -43,7 +43,7 @@ public:
 
 
 private:
-    void populateStructFromFiles(json& _struct, std::string baseName, int number);
+    void populateStructFromFiles(json& _struct, std::string baseName);
 
     json::iterator findById(json& objects, Id id);
 

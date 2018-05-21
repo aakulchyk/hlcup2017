@@ -3,26 +3,38 @@
 #include <iostream>
 #include <mutex>
 #include <ctime>
+
+#include <stdio.h>
 #include "storage.h"
 
 std::mutex storage_mutex;  // protects storage
 
+const std::string path = "/tmp/data/";
 
-void JsonStorage::populateStructFromFiles(json& _struct, std::string baseName, int number)
+void unzipData() {
+    std::stringstream commandstream;
+    commandstream << "unzip -u " << path << "data.zip -d ./data/";
+    system(commandstream.str().c_str());
+}
+
+void JsonStorage::populateStructFromFiles(json& _struct, std::string baseName)
 {
 
-    for (int i = 1; i <= number; i++) {
+    for (int i = 1;; i++) {
         std::stringstream namestream;
-        namestream << "data/" << baseName << "_" << i << ".json";
-        std::cout << "open: " << namestream.str() << std::endl;
+        namestream << path << baseName << "_" << i << ".json";
 
         std::ifstream is(namestream.str());
+
+        if (!is.is_open())
+            break;
+
+        std::cout << "open: " << namestream.str() << std::endl;
 
         json data;
         is >> data;
 
         for (auto entry : data[baseName]) {
-            //std::cout << "entry: " << entry << std::endl;
             _struct.push_back(entry);
         }
         is.close();
@@ -34,11 +46,11 @@ void JsonStorage::populateStructFromFiles(json& _struct, std::string baseName, i
 
 JsonStorage::JsonStorage()
 {
-    populateStructFromFiles(_users, "users", 11);
+    unzipData();
 
-    populateStructFromFiles(_locations, "locations", 8);
-
-    populateStructFromFiles(_visits, "visits", 11);
+    populateStructFromFiles(_users, "users");
+    populateStructFromFiles(_locations, "locations");
+    populateStructFromFiles(_visits, "visits");
 }
 
 
