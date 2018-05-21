@@ -43,6 +43,8 @@ public:
 
 
 private:
+    void populateStructFromFiles(json& _struct, std::string baseName, int number);
+
     json::iterator findById(json& objects, Id id);
 
     template <typename T>

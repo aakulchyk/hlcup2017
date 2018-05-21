@@ -7,59 +7,51 @@
 
 std::mutex storage_mutex;  // protects storage
 
+
+void JsonStorage::populateStructFromFiles(json& _struct, std::string baseName, int number)
+{
+
+    for (int i = 1; i <= number; i++) {
+        std::stringstream namestream;
+        namestream << "data/" << baseName << "_" << i << ".json";
+        std::cout << "open: " << namestream.str() << std::endl;
+
+        std::ifstream is(namestream.str());
+
+        json data;
+        is >> data;
+
+        for (auto entry : data[baseName]) {
+            //std::cout << "entry: " << entry << std::endl;
+            _struct.push_back(entry);
+        }
+        is.close();
+    }
+
+    std::cout << "read " << baseName << ", " << _struct.size() << " records" << std::endl;
+}
+
+
 JsonStorage::JsonStorage()
 {
-    json data;
-    std::ifstream i("data/users_1.json");
-    i >> data;
-    _users = data["users"];
-    std::cout << "read users, " << _users.size() << " records" << std::endl;
+    populateStructFromFiles(_users, "users", 11);
 
-    i.close();
-    i.open("data/locations_1.json");
-    i >> data;
-    _locations = data["locations"];
-    std::cout << "read locations, " << _locations.size() << " records" << std::endl;
+    populateStructFromFiles(_locations, "locations", 8);
 
-    i.close();
-    i.open("data/visits_1.json");
-    i >> data;
-    _visits = data["visits"];
-    std::cout << "read visits, " << _visits.size() << " records" << std::endl;
+    populateStructFromFiles(_visits, "visits", 11);
 }
 
 
 bool JsonStorage::user(Id id, User& o) {
     return getStruct<User>(id, _users, o);
-/*    bool ret = false;
-    auto it = findById(_users, id);
-    if (it != _users.end()) {
-        o = *it;
-        ret = true;
-    }
-    return ret;*/
 }
 
 bool JsonStorage::location(Id id, Location& o) {
     return getStruct<Location>(id, _locations, o);
-/*    bool ret = false;
-    auto it = findById(_locations, id);
-    if (it != _locations.end()) {
-        o = *it;
-        ret = true;
-    }
-    return ret;*/
 }
 
 bool JsonStorage::visit(Id id, Visit& o) {
     return getStruct<Visit>(id, _visits, o);
-/*    bool ret = false;
-    auto it = findById(_visits, id);
-    if (it != _visits.end()) {
-        o = *it;
-        ret = true;
-    }
-    return ret;*/
 }
 
 json JsonStorage::userVisits(Id id, ConditionMap conditions)
