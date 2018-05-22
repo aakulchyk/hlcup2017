@@ -115,6 +115,13 @@ json JsonStorage::userVisits(Id id, ConditionMap conditions)
         visits.push_back(userVisit);
     }
 
+    std::sort(visits.begin(), visits.end(), [=](const json& p, const json& q) {
+        time_t pt = p["visited_at"];
+        time_t qt = q["visited_at"];
+
+        return std::difftime (pt, qt) < 0;
+    });
+
     return visits;
 }
 
