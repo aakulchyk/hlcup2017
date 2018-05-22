@@ -35,7 +35,7 @@ void client_session(socket_ptr sock) {
     buf.assign(0);
     boost::system::error_code error;
     unsigned int id = 0;
-    json content;
+    json content = {};
     int code = 200;
     try {
         size_t len = sock->read_some(buffer(buf), error);
@@ -90,8 +90,14 @@ void client_session(socket_ptr sock) {
                 if (storage->location(id, l)) {
                     bool paramsValid;
                     auto conditions = UrlParser::instance().extractGetParams(request, paramsValid);
-                    if (paramsValid)
-                        content["avg"] = storage->locationAvgRate(id, conditions);
+
+                    if (paramsValid) {
+                        double avg = storage->locationAvgRate(id, conditions);
+                        if (avg > 0.01)
+                            content["avg"] = ((long long)(avg * 100000.)) / 100000. + 0.00001;
+                        else
+                            content["avg"] = 0;
+                    }
                     else
                         code = 400;
                 }
@@ -100,7 +106,7 @@ void client_session(socket_ptr sock) {
                 break;
             }
             case UrlParser::UPDATE_USER: {
-                json user = UrlParser::instance().extractJson(request);
+                json user = json::parse(UrlParser::instance().extractJson(request));
                 if (User::validate(user))
                     code = storage->updateUser(id, user) ? 200 : 404;
                 else
@@ -108,19 +114,30 @@ void client_session(socket_ptr sock) {
                 break;
             }
             case UrlParser::UPDATE_LOCATION: {
-                json location = UrlParser::instance().extractJson(request);
+                json location = json::parse(UrlParser::instance().extractJson(request));
                 code = storage->updateLocation(id, location) ? 200 : 404;
                 break;
             }
             case UrlParser::UPDATE_VISIT: {
-                json visit = UrlParser::instance().extractJson(request);
+                json visit = json::parse(UrlParser::instance().extractJson(request));
                 code = storage->updateVisit(id, visit) ? 200 : 404;
                 break;
             }
-            case UrlParser::CREATE_USER:
-            case UrlParser::CREATE_LOCATION:
-            case UrlParser::CREATE_VISIT:
+            case UrlParser::CREATE_USER: {
+                json user = json::parse(UrlParser::instance().extractJson(request));
+                code = storage->createUser(user) ? 200 : 400;
                 break;
+            }
+            case UrlParser::CREATE_LOCATION: {
+                json location = json::parse(UrlParser::instance().extractJson(request));
+                code = storage->createLocation(location) ? 200 : 400;
+                break;
+            }
+            case UrlParser::CREATE_VISIT: {
+                json visit = json::parse(UrlParser::instance().extractJson(request));
+                code = storage->createVisit(visit) ? 200 : 400;
+                break;
+            }
             default:
                 code = 400;
         }
@@ -129,7 +146,7 @@ void client_session(socket_ptr sock) {
         std::cerr << "1 "  << e.what() << std::endl;
     }
 
-    std::string dump = content.dump();
+    std::string dump = content.dump(4);
     std::stringstream ss;
     ss << "HTTP/1.1 " << status[code]
        << "\nContent-Length: " << dump.size()

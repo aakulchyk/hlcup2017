@@ -23,6 +23,10 @@ public:
     virtual bool updateUser(Id id, json user) = 0;
     virtual bool updateLocation(Id id, json location) = 0;
     virtual bool updateVisit(Id id, json visit) = 0;
+
+    virtual bool createUser(json user) = 0;
+    virtual bool createLocation(json location) = 0;
+    virtual bool createVisit(json visit) = 0;
 };
 
 
@@ -41,6 +45,9 @@ public:
     bool updateLocation(Id id, json location);
     bool updateVisit(Id id, json visit);
 
+    bool createUser(json user);
+    bool createLocation(json location);
+    bool createVisit(json visit);
 
 private:
     void populateStructFromFiles(json& _struct, std::string baseName);

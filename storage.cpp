@@ -9,11 +9,12 @@
 
 std::mutex storage_mutex;  // protects storage
 
-const std::string path = "/tmp/data/";
+const std::string zip_path = "/tmp/data/";
+const std::string data_path = "./data/";
 
 void unzipData() {
     std::stringstream commandstream;
-    commandstream << "unzip -u " << path << "data.zip -d ./data/";
+    commandstream << "unzip -u " << zip_path << "data.zip -d " << data_path;
     system(commandstream.str().c_str());
 }
 
@@ -22,14 +23,16 @@ void JsonStorage::populateStructFromFiles(json& _struct, std::string baseName)
 
     for (int i = 1;; i++) {
         std::stringstream namestream;
-        namestream << path << baseName << "_" << i << ".json";
+        namestream << data_path << baseName << "_" << i << ".json";
 
         std::ifstream is(namestream.str());
 
-        if (!is.is_open())
-            break;
-
         std::cout << "open: " << namestream.str() << std::endl;
+        if (is.fail()) {
+            std::cerr << "Error: " << strerror(errno) << std::endl;
+            //std::cout << "failed opening file. " << std::endl;
+            break;
+        }
 
         json data;
         is >> data;
@@ -104,15 +107,23 @@ json JsonStorage::userVisits(Id id, ConditionMap conditions)
                 continue;
         }
 
-        visits.push_back(v);
+        json userVisit;
+        userVisit["mark"] = v["mark"];
+        userVisit["place"] = visitLocation.place;
+        userVisit["visited_at"] = v["visited_at"];
+
+        visits.push_back(userVisit);
     }
 
     return visits;
 }
 
+
+const double seconds_in_year = 31556926.0;
+
 double JsonStorage::locationAvgRate(Id id, ConditionMap conditions)
 {
-    double rate = 0;
+    double rate = 0.0;
     int count = 0;
     for (auto v : _visits) {
         if (v.empty()) continue;
@@ -139,7 +150,7 @@ double JsonStorage::locationAvgRate(Id id, ConditionMap conditions)
 
         if (conditions.find("fromAge") != conditions.end()) {
             int fromAge = std::stoi(conditions["fromAge"]);
-            int userAge = std::time(0) - visitUser.birth_date;
+            int userAge = std::difftime(std::time(0), visitUser.birth_date) / seconds_in_year;
 
             if (userAge <= fromAge)
                 continue;
@@ -147,7 +158,7 @@ double JsonStorage::locationAvgRate(Id id, ConditionMap conditions)
 
         if (conditions.find("toAge") != conditions.end()) {
             int toAge = std::stoi(conditions["toAge"]);
-            int userAge = std::time(0) - visitUser.birth_date;
+            int userAge = std::difftime(std::time(0), visitUser.birth_date) / seconds_in_year;
 
             if (userAge >= toAge)
                 continue;
@@ -164,9 +175,7 @@ double JsonStorage::locationAvgRate(Id id, ConditionMap conditions)
 
     }
 
-    rate /= count;
-
-    return rate;
+    return count > 0 ? rate / count  :  0.0;
 }
 
 bool JsonStorage::updateUser(Id id, json uuser)
@@ -188,6 +197,45 @@ bool JsonStorage::updateVisit(Id id, json uvisit)
     std::lock_guard<std::mutex> lock(storage_mutex);
     auto it = findById(_visits, id);
     return it != _visits.end() ? updateStruct(*it, id, uvisit) : false;
+}
+
+bool JsonStorage::createUser(json user)
+{
+    if (!User::validate(user, true))
+        return false;
+    Id id = user["id"];
+    if (findById(_users, id) != _users.end())
+        return false;
+
+    std::lock_guard<std::mutex> lock(storage_mutex);
+    _users.push_back(user);
+    return true;
+}
+
+bool JsonStorage::createLocation(json location)
+{
+    if (!Location::validate(location, true))
+        return false;
+    Id id = location["id"];
+    if (findById(_locations, id) != _locations.end())
+        return false;
+
+    std::lock_guard<std::mutex> lock(storage_mutex);
+    _locations.push_back(location);
+    return true;
+}
+
+bool JsonStorage::createVisit(json visit)
+{
+    if (!Visit::validate(visit, true))
+        return false;
+    Id id = visit["id"];
+    if (findById(_visits, id) != _visits.end())
+        return false;
+
+    std::lock_guard<std::mutex> lock(storage_mutex);
+    _visits.push_back(visit);
+    return true;
 }
 
 json::iterator JsonStorage::findById(json& objects, Id id) {
