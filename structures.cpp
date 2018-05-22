@@ -2,39 +2,51 @@
 
 #include <iostream>
 #include <regex>
+#include <algorithm>
 
 
-bool User::validate(json o) {
+bool User::validate(json o, bool needAllFields) {
     try {
         int dummy;
+        int fields = 0;
         if (o.find("id") != o.end()) {
             dummy = o["id"];
+            fields++;
         }
         if (o.find("email") != o.end()) {
+
             std::string s = o["email"];
             std::regex re("(\\w|\\.)+@\\w+\\.(\\w){1,3}");
             std::smatch m;
             if (false == regex_match(s, m, re))
                 throw std::invalid_argument("email is incorrect");
+            fields++;
         }
         if (o.find("first_name") != o.end()) {
             std::string s = o["first_name"];
             if (s.length() < 1 || s.length() > 50)
                 throw std::invalid_argument("first_name is incorrect");
+            fields++;
         }
         if (o.find("last_name") != o.end()) {
             std::string s = o["last_name"];
             if (s.length() < 1 || s.length() > 50)
                 throw std::invalid_argument("last_name is incorrect");
+            fields++;
         }
         if (o.find("gender") != o.end()) {
             std::string s = o["gender"];
             if (s.length() < 1 || s.length() > 2)
                 throw std::invalid_argument("gender is incorrect");
+            fields++;
         }
         if (o.find("birth_date") != o.end()) {
             dummy = o["birth_date"];
+            fields++;
         }
+
+        if (needAllFields && fields < _max_fields_)
+            return false;
 
         return true;
     }
@@ -81,32 +93,42 @@ void to_json(json& o, const User& user) {
     }
 }
 
-bool Location::validate(json o)
+bool Location::validate(json o, bool needAllFields)
 {
     try {
         long int dummy;
+        int fields = 0;
+
         if (o.find("id") != o.end()) {
             dummy = o["id"];
+            fields++;
         }
         if (o.find("place") != o.end()) {
             std::string s = o["email"];
+            fields++;
         }
         if (o.find("country") != o.end()) {
             std::string s = o["country"];
             if (s.length() < 1 || s.length() > 50)
                 throw std::invalid_argument("country is incorrect");
+            fields++;
         }
         if (o.find("city") != o.end()) {
             std::string s = o["city"];
             if (s.length() < 1 || s.length() > 50)
                 throw std::invalid_argument("city is incorrect");
+            fields++;
         }
 
         if (o.find("distance") != o.end()) {
             dummy = o["distance"];
             if (dummy < 0)
                 throw std::invalid_argument("distance is invalid");
+            fields++;
         }
+
+        if (needAllFields && fields < _max_fields_)
+            return false;
 
         return true;
     }
@@ -148,37 +170,43 @@ void to_json(json& o, const Location& location) {
     }
 }
 
-bool Visit::validate(json o)
+bool Visit::validate(json o, bool needAllFields)
 {
     try {
         long int dummy;
+        int fields = 0;
+
         if (o.find("id") != o.end()) {
             dummy = o["id"];
             if (dummy < 0) throw std::invalid_argument("id is invalid");
-
+            fields++;
         }
 
         if (o.find("location") != o.end()) {
             dummy = o["location"];
             if (dummy < 0) throw std::invalid_argument("location is invalid");
-
+            fields++;
         }
 
         if (o.find("user") != o.end()) {
             dummy = o["user"];
             if (dummy < 0) throw std::invalid_argument("user is invalid");
-
+            fields++;
         }
         if (o.find("visited_at") != o.end()) {
             dummy = o["visited_at"];
             if (dummy < 0) throw std::invalid_argument("visited_at is invalid");
-
+            fields++;
         }
 
         if (o.find("mark") != o.end()) {
             dummy = o["mark"];
             if (dummy < 0) throw std::invalid_argument("mark is invalid");
+            fields++;
         }
+
+        if (needAllFields && fields < _max_fields_)
+            return false;
 
         return true;
     }
