@@ -8,6 +8,7 @@
 //#include <boost/beast/http/parser.hpp>
 #include <stdlib.h>
 #include <boost/array.hpp>
+#include <clocale>
 
 #include <boost/locale/encoding_utf.hpp>
 
@@ -90,11 +91,10 @@ void client_session(socket_ptr sock) {
                 if (storage->location(id, l)) {
                     bool paramsValid;
                     auto conditions = UrlParser::instance().extractGetParams(request, paramsValid);
-
                     if (paramsValid) {
                         double avg = storage->locationAvgRate(id, conditions);
                         if (avg > 0.01)
-                            content["avg"] = ((long long)(avg * 100000.)) / 100000. + 0.00001;
+                            content["avg"] = ((long long)(avg * 100000. + 0.5)) / 100000.;
                         else
                             content["avg"] = 0;
                     }
@@ -107,7 +107,7 @@ void client_session(socket_ptr sock) {
             }
             case UrlParser::UPDATE_USER: {
                 json user = json::parse(UrlParser::instance().extractJson(request));
-                if (User::validate(user))
+                if (User::validate(user, false))
                     code = storage->updateUser(id, user) ? 200 : 404;
                 else
                     code = 400;
@@ -170,6 +170,8 @@ void client_session(socket_ptr sock) {
 
 #include "tests.h"
 int main(int argc, char **argv) {
+
+    std::setlocale(LC_ALL, "en_US.utf8");
     // TESTS
     test_urlparser();
 

@@ -71,7 +71,8 @@ bool JsonStorage::visit(Id id, Visit& o) {
 
 json JsonStorage::userVisits(Id id, ConditionMap conditions)
 {
-    json visits;
+    json visits = json::array();
+
     for (auto v : _visits) {
         if (v.empty())
             continue;
@@ -79,14 +80,16 @@ json JsonStorage::userVisits(Id id, ConditionMap conditions)
             continue;
 
         if (conditions.find("fromDate") != conditions.end()) {
+            time_t visitedAt = static_cast<time_t>(v["visited_at"]);
             time_t fromDate = static_cast<time_t>(std::stoi(conditions["fromDate"]));
-            if (static_cast<time_t>(v["visited_at"]) <= fromDate)
+            if (std::difftime(visitedAt, fromDate) <= 0)
                 continue;
         }
 
         if (conditions.find("toDate") != conditions.end()) {
-            time_t fromDate = static_cast<time_t>(std::stoi(conditions["toDate"]));
-            if (static_cast<time_t>(v["visited_at"]) >= fromDate)
+            time_t visitedAt = static_cast<time_t>(v["visited_at"]);
+            time_t toDate = static_cast<time_t>(std::stoi(conditions["toDate"]));
+            if (std::difftime(toDate, visitedAt) <= 0)
                 continue;
         }
 
@@ -103,7 +106,7 @@ json JsonStorage::userVisits(Id id, ConditionMap conditions)
 
         if (conditions.find("toDistance") != conditions.end()) {
             long toDistance = std::stoi(conditions["toDistance"]);
-            if (toDistance >= visitLocation.distance)
+            if (visitLocation.distance >= toDistance)
                 continue;
         }
 
@@ -118,7 +121,6 @@ json JsonStorage::userVisits(Id id, ConditionMap conditions)
     std::sort(visits.begin(), visits.end(), [=](const json& p, const json& q) {
         time_t pt = p["visited_at"];
         time_t qt = q["visited_at"];
-
         return std::difftime (pt, qt) < 0;
     });
 
@@ -137,16 +139,18 @@ double JsonStorage::locationAvgRate(Id id, ConditionMap conditions)
         if (v["location"] != id)
             continue;
 
-
         if (conditions.find("fromDate") != conditions.end()) {
+            time_t visitedAt = static_cast<time_t>(v["visited_at"]);
             time_t fromDate = static_cast<time_t>(std::stoi(conditions["fromDate"]));
-            if (static_cast<time_t>(v["visited_at"]) <= fromDate)
+            // visitedAt >= fromDate
+            if (std::difftime(visitedAt, fromDate) <= 0)
                 continue;
         }
 
         if (conditions.find("toDate") != conditions.end()) {
-            time_t fromDate = static_cast<time_t>(std::stoi(conditions["toDate"]));
-            if (static_cast<time_t>(v["visited_at"]) >= fromDate)
+            time_t visitedAt = static_cast<time_t>(v["visited_at"]);
+            time_t toDate = static_cast<time_t>(std::stoi(conditions["toDate"]));
+            if (std::difftime(toDate, visitedAt) <= 0)
                 continue;
         }
 
@@ -158,7 +162,6 @@ double JsonStorage::locationAvgRate(Id id, ConditionMap conditions)
         if (conditions.find("fromAge") != conditions.end()) {
             int fromAge = std::stoi(conditions["fromAge"]);
             int userAge = std::difftime(std::time(0), visitUser.birth_date) / seconds_in_year;
-
             if (userAge <= fromAge)
                 continue;
         }
@@ -166,7 +169,6 @@ double JsonStorage::locationAvgRate(Id id, ConditionMap conditions)
         if (conditions.find("toAge") != conditions.end()) {
             int toAge = std::stoi(conditions["toAge"]);
             int userAge = std::difftime(std::time(0), visitUser.birth_date) / seconds_in_year;
-
             if (userAge >= toAge)
                 continue;
         }
@@ -179,7 +181,6 @@ double JsonStorage::locationAvgRate(Id id, ConditionMap conditions)
 
         rate += static_cast<double>(v["mark"]);
         count++;
-
     }
 
     return count > 0 ? rate / count  :  0.0;

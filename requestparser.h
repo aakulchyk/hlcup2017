@@ -5,7 +5,9 @@
 #include <string>
 #include <map>
 #include <utility>
-
+//#include <cuchar>
+#include <codecvt>
+#include <uchar.h>
 class UrlParser {
 
 public:
@@ -19,14 +21,16 @@ public:
 
     // TODO: parse GET_USER_VISITS and GET_LOCATION_AVG_RATE requests with GET parameters
     RequestType parse(std::string input, unsigned int& id) {
+        auto rt = INVALID_REQUEST_TYPE;
+        std::smatch m;
         try {
-            auto rt = INVALID_REQUEST_TYPE;
-            std::smatch m;
-
             for (auto re : regex_map) {
                 if (regex_search(input, m, re.second)) {
                     auto s = std::string(m[1]);
-                    id = std::stoi(s);
+                    if (!s.empty()) {
+
+                        id = std::stoi(s);
+                    }
                     // don't break bcause need to find matching with with longer pattern
                     // (exclusively for GET_LOCATION & GET_LOCATION_AVG_RATE)
                     rt = re.first;
@@ -35,7 +39,10 @@ public:
             return rt;
         }
         catch (std::exception& e) {
-            std::cout << "parse: " << e.what() << std::endl;
+            std::cout << "!!!!!PARSE: " << e.what()
+                      << ": " << m[0] << ", " << m[1] << std::endl;
+            return INVALID_REQUEST_TYPE;
+
         }
     }
 
@@ -66,6 +73,8 @@ public:
             while (regex_search(input, match, regex_get_params)) {
                 std::string paramName = match[1];
                 std::string paramValue = match[2];
+
+                std::cout << "paramValue: " << paramValue << std::endl;
                 if (paramValue.empty())
                     valid = false;
 
@@ -76,6 +85,23 @@ public:
                 else if (paramName == "country") {
                    if (paramValue.length() > 50)
                        valid = false;
+
+                   std::regex codepoint("%([[:alnum:]]{2})");
+                   std::smatch m;
+                   std::string strval(paramValue);
+                   char country_cyr[50];
+                   char *p_out = country_cyr;
+                   while (regex_search(strval, m, codepoint)) {
+                       std::string code =  m[1];
+                       std::string::size_type sz;
+                       *p_out++ = static_cast<char>(std::stoi (code, &sz, 16));
+                       strval = strval.substr(std::string(m[0]).length());
+                   }
+
+                   *p_out = 0;
+                   paramValue = std::string(country_cyr);
+                   std::cout << "paramValue: " << paramValue << std::endl;
+
                 }
                 else {
                     // all the rest parameters are integer - check
@@ -91,7 +117,7 @@ public:
                         valid = false;
                     }
                 }
-                result.insert(std::make_pair(match[1], match[2]));
+                result.insert(std::make_pair(paramName, paramValue));
                 input = match.suffix().str();
             }
 
@@ -110,9 +136,9 @@ public:
 private:
     UrlParser() {
         //regex_map[TEST] = "^TEST/[[:digit:]]+";
-        regex_map[GET_USER] = "^GET[[:space:]]/users/([[:digit:]]+)";
-        regex_map[GET_VISIT] = "^GET[[:space:]]/visits/([[:digit:]]+)";
-        regex_map[GET_LOCATION] = "^GET[[:space:]]/locations/([[:digit:]]+)";
+        regex_map[GET_USER] = "^GET[[:space:]]/users/(\\d+)";
+        regex_map[GET_VISIT] = "^GET[[:space:]]/visits/(\\d+)";
+        regex_map[GET_LOCATION] = "^GET[[:space:]]/locations/(\\d+)";
         regex_map[GET_USER_VISITS] = "^GET[[:space:]]/users/([[:digit:]]+)/visits";
         regex_map[GET_LOCATION_AVG_RATE] = "^GET[[:space:]]/locations/([[:digit:]]+)/avg";
 
@@ -125,7 +151,7 @@ private:
         regex_map[CREATE_LOCATION] = "POST[[:space:]]/locations/new";
 
         //regex_get_params = "[\\?\\&]([^\\&]+)";
-        regex_get_params = "[\\?\\&]([[:alpha:]]+)=([[:alnum:]]*)";
+        regex_get_params = "[\\?\\&]([[:alpha:]]+)=([%[:alnum:]]*)";
     }
 
     static UrlParser *_instance;
