@@ -1,6 +1,7 @@
 #pragma once
 
 #include <map>
+#include <string>
 #include "structures.h"
 
 #include "nlohmann/json.hpp"
@@ -100,6 +101,7 @@ public:
 private:
     sqlite::database db;
 
+    json populateStructFromFile(std::string baseName, int index);
 };
 
 
