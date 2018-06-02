@@ -9,7 +9,10 @@ using Id = unsigned int;
 
 using ConditionMap = std::map<std::string, std::string>;
 
-//enum Struct {USER, LOCATION, VISIT};
+
+const std::string zip_path = "/tmp/data/";
+const std::string data_path = "./data/";
+
 
 class AbstractStorage {
 public:
@@ -27,6 +30,8 @@ public:
     virtual bool createUser(json user) = 0;
     virtual bool createLocation(json location) = 0;
     virtual bool createVisit(json visit) = 0;
+
+    static void unzipData();
 };
 
 
@@ -70,7 +75,35 @@ private:
     json _users, _locations, _visits;
 };
 
+#include <sqlite_modern_cpp.h>
 
+class SqliteCppStorage : public AbstractStorage {
+
+public:
+    SqliteCppStorage();
+
+    bool user(Id id, User& o);
+    bool location(Id id, Location& o);
+    bool visit(Id id, Visit& o);
+
+    virtual json userVisits(Id id, ConditionMap conditions = {});
+    virtual double locationAvgRate(Id id, ConditionMap conditions = {});
+
+    virtual bool updateUser(Id id, json user);
+    virtual bool updateLocation(Id id, json location);
+    virtual bool updateVisit(Id id, json visit);
+
+    virtual bool createUser(json user);
+    virtual bool createLocation(json location);
+    virtual bool createVisit(json visit);
+
+private:
+    sqlite::database db;
+
+};
+
+
+#undef SQLITE_ORM
 #ifdef SQLITE_ORM
 
 #include "sqlite_orm/sqlite_orm.h"

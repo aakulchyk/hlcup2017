@@ -9,10 +9,7 @@
 
 std::mutex storage_mutex;  // protects storage
 
-const std::string zip_path = "/tmp/data/";
-const std::string data_path = "./data/";
-
-void unzipData() {
+void AbstractStorage::unzipData() {
     std::stringstream commandstream;
     commandstream << "unzip -u " << zip_path << "data.zip -d " << data_path;
     system(commandstream.str().c_str());
@@ -27,7 +24,7 @@ void JsonStorage::populateStructFromFiles(json& _struct, std::string baseName)
 
         std::ifstream is(namestream.str());
 
-        std::cout << "open: " << namestream.str() << std::endl;
+        //std::cout << "open: " << namestream.str() << std::endl;
         if (is.fail()) {
             std::cerr << "Error: " << strerror(errno) << std::endl;
             //std::cout << "failed opening file. " << std::endl;
@@ -100,6 +97,7 @@ json JsonStorage::userVisits(Id id, ConditionMap conditions)
 
         if (conditions.find("country") != conditions.end()) {
             std::string visitCountry  = conditions["country"];
+            //std::cout << "country: " << visitLocation.country << " != " << visitCountry << std::endl;
             if (visitCountry != visitLocation.country)
                 continue;
         }
@@ -143,15 +141,19 @@ double JsonStorage::locationAvgRate(Id id, ConditionMap conditions)
             time_t visitedAt = static_cast<time_t>(v["visited_at"]);
             time_t fromDate = static_cast<time_t>(std::stoi(conditions["fromDate"]));
             // visitedAt >= fromDate
-            if (std::difftime(visitedAt, fromDate) <= 0)
+            if (std::difftime(visitedAt, fromDate) <= 0) {
+                //std::cout << "fromDate: " << visitedAt << " < " << fromDate << std::endl;
                 continue;
+            }
         }
 
         if (conditions.find("toDate") != conditions.end()) {
             time_t visitedAt = static_cast<time_t>(v["visited_at"]);
             time_t toDate = static_cast<time_t>(std::stoi(conditions["toDate"]));
-            if (std::difftime(toDate, visitedAt) <= 0)
+            if (std::difftime(toDate, visitedAt) <= 0) {
+                //std::cout << "toDate: " << visitedAt << " > " << toDate << std::endl;
                 continue;
+            }
         }
 
         User visitUser;
@@ -169,14 +171,18 @@ double JsonStorage::locationAvgRate(Id id, ConditionMap conditions)
         if (conditions.find("toAge") != conditions.end()) {
             int toAge = std::stoi(conditions["toAge"]);
             int userAge = std::difftime(std::time(0), visitUser.birth_date) / seconds_in_year;
-            if (userAge >= toAge)
+            if (userAge >= toAge) {
+                //std::cout << "toAge: " << userAge << " >= " << toAge << std::endl;
                 continue;
+            }
         }
 
         if (conditions.find("gender") != conditions.end()) {
             std::string visitGender = conditions["gender"];
-            if (visitGender != visitUser.gender)
+            if (visitGender != visitUser.gender) {
+                //std::cout << "gender: " << visitUser.gender << " != " << visitGender << std::endl;
                 continue;
+            }
         }
 
         rate += static_cast<double>(v["mark"]);
@@ -262,8 +268,9 @@ bool JsonStorage::updateStruct(json &_struct, Id id, const json& newObj)
     return true;
 }
 
-
 // ======================================
+
+
 #ifdef SQLITE_ORM
 
 using namespace sqlite_orm;

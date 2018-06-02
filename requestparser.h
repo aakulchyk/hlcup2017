@@ -74,7 +74,7 @@ public:
                 std::string paramName = match[1];
                 std::string paramValue = match[2];
 
-                std::cout << "paramValue: " << paramValue << std::endl;
+                //std::cout << "paramName: " << paramName  << " paramValue: " << paramValue << std::endl;
                 if (paramValue.empty())
                     valid = false;
 
@@ -83,7 +83,7 @@ public:
                         valid = false;
                 }
                 else if (paramName == "country") {
-                   if (paramValue.length() > 50)
+                   if (paramValue.length() > 3*50)
                        valid = false;
 
                    std::regex codepoint("%([[:alnum:]]{2})");
@@ -100,8 +100,7 @@ public:
 
                    *p_out = 0;
                    paramValue = std::string(country_cyr);
-                   std::cout << "paramValue: " << paramValue << std::endl;
-
+                   //std::cout << "country: " << paramValue << std::endl;
                 }
                 else {
                     // all the rest parameters are integer - check

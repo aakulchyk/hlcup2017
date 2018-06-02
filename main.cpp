@@ -154,8 +154,8 @@ void client_session(socket_ptr sock) {
        << std::endl << std::endl
        << dump;
 
-    std::cout << std::endl << "RESPONSE: " << std::endl << ss.str() << std::endl
-              << "---------------" << std::endl;;
+    //std::cout << std::endl << "RESPONSE: " << std::endl << ss.str() << std::endl
+    //          << "---------------" << std::endl;;
 
     try {
         write(*sock, buffer(ss.str()));
@@ -164,7 +164,7 @@ void client_session(socket_ptr sock) {
         std::cerr << "2 " << e.what() << std::endl;
         sock->close();
     }
-    std::cout << "Closing socket." << std::endl;
+    //std::cout << "Closing socket." << std::endl;
     sock->close();
 }
 
@@ -188,13 +188,13 @@ int main(int argc, char **argv) {
 
     try {
         //Here is a simple synchronous server:using boost::asio;
-        std::cout << "Starting server..." << std::endl;
+        //std::cout << "Starting server..." << std::endl;
 
-        storage = new JsonStorage();
+        storage = new SqliteCppStorage();//JsonStorage();
 
         ip::tcp::endpoint ep( ip::tcp::v4(), port); // listen on selected port
         ip::tcp::acceptor acc(service, ep);
-        std::cout << "Entering cycle..." << std::endl;
+        //std::cout << "Entering cycle..." << std::endl;
         while (true)
         {
             socket_ptr sock(new ip::tcp::socket(service));
