@@ -175,14 +175,63 @@ json SqliteCppStorage::populateStructFromFile(std::string baseName, int index) {
 
 
 bool SqliteCppStorage::user(Id id, User& o) {
-    return true;
+    try {
+        // id, email, first_name, last_name, gender, birth_date
+        db << "select * from users where id = ? ;" << id
+             >> [&](int id, string email, string first_name, string last_name, string gender, int birth_date) {
+                o.id = id;
+                o.email = email;
+                o.first_name = first_name;
+                o.last_name = last_name;
+                o.gender = gender;
+                o.birth_date = birth_date;
+             };
+        return true;
+    }
+    catch (sqlite_exception &e) {
+        cerr  << e.get_code() << ": " << e.what() << " during "
+         << e.get_sql() << endl;
+         return false;
+    }
 }
 
 bool SqliteCppStorage::location(Id id, Location& o) {
-    return true;
+    try {
+        // id, place, country, city, distance
+        db << "select * from locations where id = ? ;" << id
+             >> [&](int id, string place, string country, string city, int distance) {
+                o.id = id;
+                o.place = place;
+                o.country = country;
+                o.city = city;
+                o.distance = distance;
+             };
+        return true;
+    }
+    catch (sqlite_exception &e) {
+        cerr  << e.get_code() << ": " << e.what() << " during "
+         << e.get_sql() << endl;
+         return false;
+    }
 }
 bool SqliteCppStorage::visit(Id id, Visit& o) {
-    return true;
+    try {
+        // id, location, user, visited_at, mark
+        db << "select * from visits where id = ? ;" << id
+             >> [&](int id, int location, int user, int visited_at, int mark) {
+                o.id = id;
+                o.location = location;
+                o.user = user;
+                o.visited_at = visited_at;
+                o.mark = mark;
+             };
+        return true;
+    }
+    catch (sqlite_exception &e) {
+        cerr  << e.get_code() << ": " << e.what() << " during "
+         << e.get_sql() << endl;
+         return false;
+    }
 }
 
 json SqliteCppStorage::userVisits(Id id, ConditionMap conditions) {
