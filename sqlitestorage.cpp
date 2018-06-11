@@ -235,6 +235,47 @@ bool SqliteCppStorage::visit(Id id, Visit& o) {
 }
 
 json SqliteCppStorage::userVisits(Id id, ConditionMap conditions) {
+    try {
+        json visits = json::array();
+        // id, location, user, visited_at, mark
+        std::stringstream queryStream;
+
+        queryStream << "select v.mark, v.visited_at, l.place from visits v";
+        queryStream << " inner join locations l on l.id = v.location";
+
+        queryStream << " where user = " << id;
+
+        if (conditions.find("country") != conditions.end()) {
+            queryStream << " and l.country = " << conditions["country"];
+        }
+
+        if (conditions.find("fromDate") != conditions.end()) {
+            queryStream << " and v.visited_at > " << conditions["fromDate"];
+        }
+
+        if (conditions.find("toDate") != conditions.end()) {
+            queryStream << " and v.visited_at < " << conditions["toDate"];
+        }
+
+        if (conditions.find("toDistance") != conditions.end()) {
+            queryStream << " and l.distance < " << conditions["toDistance"];
+        }
+
+        std::cout << "Query: " << queryStream.str();
+
+        db << queryStream.str()
+             >> [&](int mark, int visited_at, std::string place) {
+                json visit = {  {"mark", mark}, {"visited_at", visited_at}, {"place", place} };
+                visits.push_back(visit);
+             };
+
+        return visits;
+    }
+    catch (sqlite_exception &e) {
+        cerr  << e.get_code() << ": " << e.what() << " during "
+         << e.get_sql() << endl;
+         return false;
+    }
     return json();
 }
 double SqliteCppStorage::locationAvgRate(Id id, ConditionMap conditions){
@@ -242,7 +283,34 @@ double SqliteCppStorage::locationAvgRate(Id id, ConditionMap conditions){
 }
 
 bool SqliteCppStorage::updateUser(Id id, json user) {
-    return true;
+    try {
+        std::stringstream cmdstream;
+        if (user.empty())
+            return false;
+
+        cout << "user dump: " << user.dump() << endl;
+
+        for (auto it = user.begin(); it != user.end(); ++it) {
+            if (it != user.begin())
+                cmdstream << ", ";
+            cmdstream << it.key() << " = " << it.value();
+        }
+
+        string str = cmdstream.str();
+        cout << "Params to update : " << str << endl;
+
+        db
+        << "update users "
+        << "set " << cmdstream.str()
+        << "where id = ?;"
+        << id;
+        return true;
+    }
+    catch (sqlite_exception &e) {
+        cerr  << e.get_code() << ": " << e.what() << " during "
+         << e.get_sql() << endl;
+         return false;
+    }
 }
 bool SqliteCppStorage::updateLocation(Id id, json location) {
     return true;
