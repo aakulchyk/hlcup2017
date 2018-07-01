@@ -98,6 +98,8 @@ public:
     virtual bool createLocation(json location);
     virtual bool createVisit(json visit);
 
+    bool tryQuery(std::string);
+
 private:
     sqlite::database db;
 
@@ -115,5 +117,7 @@ class SqliteOrmStorage : public AbstractStorage {
     bool visit(Id id, Visit& o);
     SqliteOrmStorage();
 };
+
+
 
 #endif

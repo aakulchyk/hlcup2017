@@ -26,24 +26,24 @@ public:
         try {
             for (auto re : regex_map) {
                 if (regex_search(input, m, re.second)) {
+                    rt = re.first;
                     auto s = std::string(m[1]);
                     if (!s.empty()) {
-
                         id = std::stoi(s);
                     }
                     // don't break bcause need to find matching with with longer pattern
                     // (exclusively for GET_LOCATION & GET_LOCATION_AVG_RATE)
-                    rt = re.first;
+                    
                 }
             }
-            return rt;
         }
         catch (std::exception& e) {
-            std::cout << "!!!!!PARSE: " << e.what()
-                      << ": " << m[0] << ", " << m[1] << std::endl;
-            return INVALID_REQUEST_TYPE;
-
+            //std::cout << "PARSE: " << e.what()
+            //          << ": " << m[0] << ", " << m[1] << std::endl;
+            id = 0;
         }
+
+        return rt;
     }
 
     std::string extractJson(std::string input) {
@@ -135,15 +135,15 @@ public:
 private:
     UrlParser() {
         //regex_map[TEST] = "^TEST/[[:digit:]]+";
-        regex_map[GET_USER] = "^GET[[:space:]]/users/(\\d+)";
-        regex_map[GET_VISIT] = "^GET[[:space:]]/visits/(\\d+)";
-        regex_map[GET_LOCATION] = "^GET[[:space:]]/locations/(\\d+)";
+        regex_map[GET_USER] = "^GET[[:space:]]/users/(\\w+)";
+        regex_map[GET_VISIT] = "^GET[[:space:]]/visits/(\\w+)";
+        regex_map[GET_LOCATION] = "^GET[[:space:]]/locations/(\\w+)";
         regex_map[GET_USER_VISITS] = "^GET[[:space:]]/users/([[:digit:]]+)/visits";
-        regex_map[GET_LOCATION_AVG_RATE] = "^GET[[:space:]]/locations/([[:digit:]]+)/avg";
+        regex_map[GET_LOCATION_AVG_RATE] = "^GET[[:space:]]/locations/(\\w+)/avg";
 
-        regex_map[UPDATE_USER] = "POST[[:space:]]/users/([[:digit:]]+)";
-        regex_map[UPDATE_VISIT] = "POST[[:space:]]/visits/([[:digit:]]+)";
-        regex_map[UPDATE_LOCATION] = "POST[[:space:]]/locations/([[:digit:]]+)";
+        regex_map[UPDATE_USER] = "POST[[:space:]]/users/(\\w+)";
+        regex_map[UPDATE_VISIT] = "POST[[:space:]]/visits/(\\w+)";
+        regex_map[UPDATE_LOCATION] = "POST[[:space:]]/locations/(\\w+)";
 
         regex_map[CREATE_USER] = "POST[[:space:]]/users/new";
         regex_map[CREATE_VISIT] = "POST[[:space:]]/visits/new";

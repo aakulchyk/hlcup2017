@@ -1,0 +1,8 @@
+#!/bin/sh
+
+if ["%1" = "login"]; then
+    docker login stor.highloadcup.ru
+fi
+docker build -t server .
+docker tag server stor.highloadcup.ru/travels/sharp_crocodile
+docker push stor.highloadcup.ru/travels/sharp_crocodile

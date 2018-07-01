@@ -8,14 +8,26 @@ set(CMAKE_CXX_STANDARD 14)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
-include_directories(. nlohmann sqlite_orm sqlite_modern_cpp/hdr)
+include_directories(. nlohmann sqlite_orm sqlite_modern_cpp/hdr mysql-connector-cpp ThreadPool)
 
-set(SOURCE main.cpp jsonstorage.cpp sqlitestorage.cpp structures.cpp)
-set(HEADER server.h storae.h urlparser.h structures.h tests.h json.hpp sqlite_modern_cpp.h) # sqlite_orm.h
+#add_subdirectory(mysql-connector-cpp)
+
+
+set(SOURCE main.cpp jsonstorage.cpp sqlitestorage.cpp mysqlstorage.cpp structures.cpp)
+set(HEADER server.h storage.h mysqlstorage.h urlparser.h structures.h tests.h json.hpp sqlite_modern_cpp.h) # sqlite_orm.h
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 
 find_package(Threads REQUIRED)
+
+find_package(MySQLConnectorCPP REQUIRED)
+if (MYSQLCONNECTORCPP_FOUND)
+    include_directories(${MYSQLCONNECTORCPP_INCLUDE_DIRS})
+else()
+    message(SEND_ERROR "Failed to find mysqlcppcon")
+    return()
+endif (MYSQLCONNECTORCPP_FOUND)
+ 
 
 find_package(sqlite3 REQUIRED)
 if (SQLITE3_FOUND)
@@ -38,4 +50,4 @@ endif()
 
 add_executable(server ${SOURCE})
 
-target_link_libraries (server Threads::Threads ${Boost_SYSTEM_LIBRARY} ${SQLITE3_LIBRARIES})
+target_link_libraries (server Threads::Threads ${Boost_SYSTEM_LIBRARY} ${SQLITE3_LIBRARIES} ${MYSQLCONNECTORCPP_LIBRARIES})

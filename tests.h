@@ -30,3 +30,31 @@ void test_urlparser() {
     test_extract_json();
     test_extract_get_params();
 }
+
+
+#include "storage.h"
+
+void test_sqlite_storage(AbstractStorage* s) {
+    SqliteCppStorage *sqlite = static_cast<SqliteCppStorage *>(s);
+
+    std::string query;
+
+    query = "select avg(v.mark) from visits v where v.location = 7161";
+    assert(true == sqlite->tryQuery(query));
+    query = "select avg(v.mark) from visits v inner join users u on u.id = v.user where v.location = 7161 and v.visited_at < 1156032000";
+    assert(true == sqlite->tryQuery(query));
+    query = "select avg(v.mark) from visits v inner join users u on u.id = v.user where v.location = 7161 and u.gender = 'f'";
+    assert(true == sqlite->tryQuery(query));
+    query = "select avg(v.mark) from visits v inner join users u on u.id = v.user where v.location = 7309 and u.birth_date > 1126000000";
+    assert(true == sqlite->tryQuery(query));
+    query = "select avg(v.mark) from visits v inner join users u on u.id = v.user where v.location = 7161 and u.birth_date < 1156032000";
+    assert(true == sqlite->tryQuery(query));
+
+
+
+    query = "update locations set country = 'Аргентина', place = 'Пруд' where id = 1739";
+    assert(true == sqlite->tryQuery(query));
+
+    //query = "select avg(v.mark) from visits v inner join users u on u.id = v.user where v.location = 13252 and v.visited_at > 1429833600 and age < 54";
+    //assert(false == sqlite->tryQuery(query));
+}

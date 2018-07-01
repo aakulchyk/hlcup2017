@@ -14,7 +14,6 @@ bool User::validate(json o, bool needAllFields) {
             fields++;
         }
         if (o.find("email") != o.end()) {
-
             std::string s = o["email"];
             std::regex re("(\\w|\\.)+@\\w+\\.(\\w){1,3}");
             std::smatch m;
@@ -133,7 +132,7 @@ bool Location::validate(json o, bool needAllFields)
         return true;
     }
     catch (const std::exception& e) {
-        std::cerr << "User::validate: "  << e.what() << std::endl;
+        //std::cerr << "Location::validate: "  << e.what() << std::endl;
         return false;
     }
 }
@@ -211,7 +210,7 @@ bool Visit::validate(json o, bool needAllFields)
         return true;
     }
     catch (const std::exception& e) {
-        std::cerr << "User::validate: "  << e.what() << std::endl;
+        //std::cerr << "Visit::validate: "  << e.what() << std::endl;
         return false;
     }
 }

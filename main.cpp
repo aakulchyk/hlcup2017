@@ -13,8 +13,11 @@
 #include <boost/locale/encoding_utf.hpp>
 
 #include "storage.h"
+#include "mysqlstorage.h"
+
 #include "requestparser.h"
 #include "nlohmann/json.hpp"
+#include "ThreadPool.h"
 
 using json = nlohmann::json;
 using namespace boost::asio;
@@ -29,22 +32,22 @@ std::map<int, std::string> status = {
     {404, "404 Not Found"}};
 
 void client_session(socket_ptr sock) {
-    std::cout << "new client session" << std::endl;
+    //std::cout << "[";
 
     // read data
     boost::array<char, 512> buf;
     buf.assign(0);
     boost::system::error_code error;
     unsigned int id = 0;
-    json content = {};
-    int code = 200;
+    auto content = json({});
+    auto code = 200;
     try {
         size_t len = sock->read_some(buffer(buf), error);
         std::string request(buf.data());
         auto requestType = UrlParser::instance().parse(request, id);
 
-        std::cout << "REQUEST: " << std::endl << buf.data() << std::endl
-                  << "---------------" << std::endl;
+        //std::cout << "REQUEST: " << std::endl << buf.data() << std::endl
+        //          << "---------------" << std::endl;
 
         switch (requestType) {
             case UrlParser::GET_USER: {
@@ -106,7 +109,9 @@ void client_session(socket_ptr sock) {
                 break;
             }
             case UrlParser::UPDATE_USER: {
+                std::cout << "update_user";
                 json user = json::parse(UrlParser::instance().extractJson(request));
+                
                 if (User::validate(user, false))
                     code = storage->updateUser(id, user) ? 200 : 404;
                 else
@@ -165,6 +170,7 @@ void client_session(socket_ptr sock) {
         sock->close();
     }
     //std::cout << "Closing socket." << std::endl;
+    //std::cout << "]";
     sock->close();
 }
 
@@ -189,17 +195,21 @@ int main(int argc, char **argv) {
     try {
         //Here is a simple synchronous server:using boost::asio;
         //std::cout << "Starting server..." << std::endl;
-
+        //storage = new MysqlStorage();
         storage = new SqliteCppStorage();//JsonStorage();
+        test_sqlite_storage(storage);
+        //storage = new JsonStorage();
+
+        ThreadPool pool(64);
 
         ip::tcp::endpoint ep( ip::tcp::v4(), port); // listen on selected port
         ip::tcp::acceptor acc(service, ep);
         //std::cout << "Entering cycle..." << std::endl;
-        while (true)
-        {
+        while (true) {
             socket_ptr sock(new ip::tcp::socket(service));
             acc.accept(*sock);
-            std::thread( std::bind(client_session, sock)).detach();
+            //std::thread( std::bind(client_session, sock)).detach();
+            pool.enqueue(std::bind(client_session, sock));
         }
     }
     catch (std::exception& e) {
