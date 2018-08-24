@@ -195,16 +195,16 @@ int main(int argc, char **argv) {
     try {
         //Here is a simple synchronous server:using boost::asio;
         //std::cout << "Starting server..." << std::endl;
-        //storage = new MysqlStorage();
-        storage = new SqliteCppStorage();//JsonStorage();
-        test_sqlite_storage(storage);
+        storage = new MysqlStorage();
+        //storage = new SqliteCppStorage();//JsonStorage();
+        //test_sqlite_storage(storage);
         //storage = new JsonStorage();
 
         ThreadPool pool(64);
 
         ip::tcp::endpoint ep( ip::tcp::v4(), port); // listen on selected port
         ip::tcp::acceptor acc(service, ep);
-        //std::cout << "Entering cycle..." << std::endl;
+        std::cout << "Entering cycle..." << std::endl;
         while (true) {
             socket_ptr sock(new ip::tcp::socket(service));
             acc.accept(*sock);

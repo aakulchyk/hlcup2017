@@ -1,15 +1,17 @@
 #pragma once
 
 #include "storage.h"
-
 #include <cppconn/driver.h>
 #include <cppconn/exception.h>
 #include <cppconn/resultset.h>
 #include <cppconn/statement.h>
+#include <cppconn/prepared_statement.h>
+
 #include <memory>
 class MysqlStorage : public AbstractStorage {
 public:
     MysqlStorage();
+    ~MysqlStorage();
 
     bool user(Id id, User& o) override;
     bool location(Id id, Location& o) override;
@@ -27,9 +29,16 @@ public:
     bool createVisit(json visit) override;
 
 private:
-    //std::shared_ptr<sql::Driver> driver;
+    json populateStructFromFile(std::string baseName, int index);
+    
+    void createTables();
+    void fillTables();
+
+    void populateUsersTable();
+    void populateLocationsTable();
+    void populateVisitsTable();
+    
+
     sql::Driver *driver;
     std::unique_ptr<sql::Connection> con;
-    //sql::Statement *stmt;
-    //sql::ResultSet *res;
 };

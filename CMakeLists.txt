@@ -8,7 +8,7 @@ set(CMAKE_CXX_STANDARD 14)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
-include_directories(. nlohmann sqlite_orm sqlite_modern_cpp/hdr mysql-connector-cpp ThreadPool)
+include_directories(. nlohmann sqlite_modern_cpp/hdr ThreadPool mysql-connector-cpp-ubuntu-64/include)
 
 #add_subdirectory(mysql-connector-cpp)
 
@@ -27,7 +27,7 @@ else()
     message(SEND_ERROR "Failed to find mysqlcppcon")
     return()
 endif (MYSQLCONNECTORCPP_FOUND)
- 
+
 
 find_package(sqlite3 REQUIRED)
 if (SQLITE3_FOUND)

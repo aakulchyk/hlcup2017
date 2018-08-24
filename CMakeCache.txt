@@ -14,6 +14,14 @@
 # EXTERNAL cache entries
 ########################
 
+//Build static version of connector library
+BUILD_STATIC:BOOL=OFF
+
+//If enabled, external libraries used by the connector, such as
+// openSSL,
+//\n   will be installed together with the connector library
+BUNDLE_DEPENDENCIES:STRING=OFF
+
 //The directory containing a CMake configuration file for Boost.
 Boost_DIR:PATH=Boost_DIR-NOTFOUND
 
@@ -31,6 +39,9 @@ Boost_SYSTEM_LIBRARY_DEBUG:FILEPATH=/usr/lib/x86_64-linux-gnu/libboost_system.so
 
 //Boost system library (release)
 Boost_SYSTEM_LIBRARY_RELEASE:FILEPATH=/usr/lib/x86_64-linux-gnu/libboost_system.so
+
+//CDK include path
+CDK_INCLUDE_DIR:PATH=/home/aliaksandr/sandbox/hlcup2017/mysql-connector-cpp/cdk/include;/home/aliaksandr/sandbox/hlcup2017/mysql-connector-cpp/cdk/include
 
 //Path to a program.
 CMAKE_AR:FILEPATH=/usr/bin/ar
@@ -183,11 +194,122 @@ CMAKE_STRIP:FILEPATH=/usr/bin/strip
 // Studio IDE projects all commands are done without /nologo.
 CMAKE_VERBOSE_MAKEFILE:BOOL=FALSE
 
+//configuration settings
+CONFIG_VARS:STRING=WITH_SSL;WITH_SSL_YASSL;HAVE_MOVE_SEMANTICS;HAVE_STATIC_ASSERT;HAVE_IS_SAME;HAVE_SHARED_PTR;HAVE_SYSTEM_ERROR;HAVE_CODECVT_UTF8;HAVE_ENDIAN_H;HAVE_BYTEORDER_H
+
+//configuration settings
+CONFIG_VARS_VAL:STRING=CDK_BIG_ENDIAN
+
+//Debug Protobuf messages
+DEBUG_PROTOBUF:BOOL=OFF
+
+//Do not show selected compiler warnings
+DISABLE_WARNINGS:BOOL=OFF
+
+//Path to a program.
+LDD:FILEPATH=/usr/bin/ldd
+
+//Path to a file.
+MYSQLCONNECTORCPP_INCLUDE_DIR:PATH=/usr/include
+
+//Path to a library.
+MYSQLCONNECTORCPP_LIBRARY:FILEPATH=/usr/lib/libmysqlcppconn.so
+
+//Where to start looking for this component.
+MYSQLCONNECTORCPP_ROOT_DIR:PATH=
+
+//Value Computed by CMake
+MySQLCDK_BINARY_DIR:STATIC=/home/aliaksandr/sandbox/hlcup2017/mysql-connector-cpp/cdk
+
+//Value Computed by CMake
+MySQLCDK_SOURCE_DIR:STATIC=/home/aliaksandr/sandbox/hlcup2017/mysql-connector-cpp/cdk
+
+//Value Computed by CMake
+MySQL_CONCPP_BINARY_DIR:STATIC=/home/aliaksandr/sandbox/hlcup2017/mysql-connector-cpp
+
+//Value Computed by CMake
+MySQL_CONCPP_SOURCE_DIR:STATIC=/home/aliaksandr/sandbox/hlcup2017/mysql-connector-cpp
+
+//The directory containing a CMake configuration file for Mysql-Connector-C++.
+Mysql-Connector-C++_DIR:PATH=Mysql-Connector-C++_DIR-NOTFOUND
+
+//Using lite version of Protobuf library
+PROTOBUF_LITE:BOOL=ON
+
+//Path to a program.
+READELF:FILEPATH=/usr/bin/readelf
+
+//Path to a program.
+READLINK:FILEPATH=/bin/readlink
+
 //Path to a file.
 SQLITE3_INCLUDE_DIR:PATH=/usr/include
 
 //Path to a library.
 SQLITE3_LIBRARY:FILEPATH=/usr/lib/x86_64-linux-gnu/libsqlite3.so
+
+//Use static MSVC runtime library
+STATIC_MSVCRT:BOOL=OFF
+
+//Turn THROW statements in the code into assertions for easier
+// debugging
+THROW_AS_ASSERT:BOOL=OFF
+
+//Enable unreachable code compiler warnings
+UNREACHABLE_CODE_WARNINGS:BOOL=OFF
+
+//Build CDK documentation
+WITH_CDK_DOC:BOOL=OFF
+
+//Build CDK unit tests
+WITH_CDK_TESTS:BOOL=OFF
+
+//Enable gcov (debug, Linux builds only)
+WITH_COVERAGE:BOOL=OFF
+
+//Build Project's documentation
+WITH_DOC:BOOL=OFF
+
+//Add Public header checks to the project
+WITH_HEADER_CHECKS:BOOL=OFF
+
+//Whether to build a variant of connector library which implements
+// legacy JDBC API
+WITH_JDBC:BOOL=OFF
+
+//Build CDK's NGS mockup server
+WITH_NGS_MOCKUP:BOOL=OFF
+
+//Configure for building binary/source packages
+WITH_PACKAGES:BOOL=OFF
+
+//Generate position independet code (PIC)
+WITH_PIC:BOOL=OFF
+
+//bundled (use yassl), yes (prefer os library if present, otherwise
+// use bundled), system (use os library), </path/to/custom/installation>
+WITH_SSL:STRING=bundled
+
+//Build project's unit tests
+WITH_TESTS:BOOL=OFF
+
+//Dependencies for target
+cdk_LIB_DEPENDS:STATIC=
+
+//Dependencies for target
+cdk_foundation_objs_LIB_DEPENDS:STATIC=
+
+//Dependencies for target
+cdk_mysqlx_objs_LIB_DEPENDS:STATIC=
+
+//Dependencies for target
+cdk_parser_objs_LIB_DEPENDS:STATIC=
+
+//Dependencies for target
+cdk_proto_mysqlx_objs_LIB_DEPENDS:STATIC=
+
+//Dependencies for the target
+connector_LIB_DEPENDS:STATIC=general;cdk;
 
 //Value Computed by CMake
 hlcup2017_server_BINARY_DIR:STATIC=/home/aliaksandr/sandbox/hlcup2017
@@ -201,14 +323,35 @@ libsqlite3-0_DIR:PATH=libsqlite3-0_DIR-NOTFOUND
 //The directory containing a CMake configuration file for libsqlite3.
 libsqlite3_DIR:PATH=libsqlite3_DIR-NOTFOUND
 
+//The directory containing a CMake configuration file for mysqlconnectorcpp.
+mysqlconnectorcpp_DIR:PATH=mysqlconnectorcpp_DIR-NOTFOUND
+
+//The directory containing a CMake configuration file for mysqlcppcon.
+mysqlcppcon_DIR:PATH=mysqlcppcon_DIR-NOTFOUND
+
+//The directory containing a CMake configuration file for mysqlcppconn.
+mysqlcppconn_DIR:PATH=mysqlcppconn_DIR-NOTFOUND
+
 //The directory containing a CMake configuration file for sqlite3.
 sqlite3_DIR:PATH=sqlite3_DIR-NOTFOUND
+
+//Dependencies for target
+taocrypt_LIB_DEPENDS:STATIC=
+
+//Dependencies for the target
+yassl_LIB_DEPENDS:STATIC=general;taocrypt;
 
 
 ########################
 # INTERNAL cache entries
 ########################
 
+//version info
+ABI_VERSION:INTERNAL=1.0
+//version info
+ABI_VERSION_MAJOR:INTERNAL=1
+//version info
+ABI_VERSION_MINOR:INTERNAL=0
 //ADVANCED property for variable: Boost_DIR
 Boost_DIR-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: Boost_INCLUDE_DIR
@@ -221,6 +364,8 @@ Boost_LIBRARY_DIR_RELEASE-ADVANCED:INTERNAL=1
 Boost_SYSTEM_LIBRARY_DEBUG-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: Boost_SYSTEM_LIBRARY_RELEASE
 Boost_SYSTEM_LIBRARY_RELEASE-ADVANCED:INTERNAL=1
+//Result of TEST_BIG_ENDIAN
+CDK_BIG_ENDIAN:INTERNAL=0
 //ADVANCED property for variable: CMAKE_AR
 CMAKE_AR-ADVANCED:INTERNAL=1
 //This is the directory where this CMakeCache.txt was created
@@ -330,6 +475,8 @@ CMAKE_SHARED_LINKER_FLAGS_MINSIZEREL-ADVANCED:INTERNAL=1
 CMAKE_SHARED_LINKER_FLAGS_RELEASE-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO
 CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1
+//CHECK_TYPE_SIZE: sizeof(unsigned short)
+CMAKE_SIZEOF_UNSIGNED_SHORT:INTERNAL=2
 //ADVANCED property for variable: CMAKE_SKIP_INSTALL_RPATH
 CMAKE_SKIP_INSTALL_RPATH-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_SKIP_RPATH
@@ -350,14 +497,99 @@ CMAKE_STRIP-ADVANCED:INTERNAL=1
 CMAKE_UNAME:INTERNAL=/bin/uname
 //ADVANCED property for variable: CMAKE_VERBOSE_MAKEFILE
 CMAKE_VERBOSE_MAKEFILE-ADVANCED:INTERNAL=1
+//version info
+CONCPP_VERSION:INTERNAL=8.0.11
+//version info
+CONCPP_VERSION_LEVEL:INTERNAL=
+//version info
+CONCPP_VERSION_MAJOR:INTERNAL=8
+//version info
+CONCPP_VERSION_MICRO:INTERNAL=11
+//version info
+CONCPP_VERSION_MINOR:INTERNAL=0
+//Directory of debug build
+DEBUGBUILDDIR:INTERNAL=/home/aliaksandr/sandbox/debug
+//ADVANCED property for variable: DEBUG_PROTOBUF
+DEBUG_PROTOBUF-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: DISABLE_WARNINGS
+DISABLE_WARNINGS-ADVANCED:INTERNAL=1
+//Details about finding MysqlConnectorCpp
+FIND_PACKAGE_MESSAGE_DETAILS_MysqlConnectorCpp:INTERNAL=[/usr/include][/usr/lib/libmysqlcppconn.so][v()]
 //Details about finding SQLITE3
 FIND_PACKAGE_MESSAGE_DETAILS_SQLITE3:INTERNAL=[/usr/lib/x86_64-linux-gnu/libsqlite3.so][/usr/include][v()]
 //Details about finding Threads
 FIND_PACKAGE_MESSAGE_DETAILS_Threads:INTERNAL=[TRUE][v()]
+//Have include sys/byteorder.h
+HAVE_BYTEORDER_H:INTERNAL=
+//Result of TRY_COMPILE
+HAVE_CDK_BIG_ENDIAN:INTERNAL=TRUE
+//Result of TRY_COMPILE
+HAVE_CMAKE_SIZEOF_UNSIGNED_SHORT:INTERNAL=TRUE
+//Test HAVE_CODECVT_UTF8
+HAVE_CODECVT_UTF8:INTERNAL=1
+//Have include sys/endian.h
+HAVE_ENDIAN_H:INTERNAL=
+//Test HAVE_IS_SAME
+HAVE_IS_SAME:INTERNAL=
+//Test HAVE_SHARED_PTR
+HAVE_SHARED_PTR:INTERNAL=1
+//Result of TRY_COMPILE
+HAVE_SIZEOF_LONG:INTERNAL=TRUE
+//Result of TRY_COMPILE
+HAVE_SIZEOF_LONG_LONG:INTERNAL=TRUE
+//Test HAVE_STATIC_ASSERT
+HAVE_STATIC_ASSERT:INTERNAL=1
+//Have include stddef.h
+HAVE_STDDEF_H:INTERNAL=1
+//Have include stdint.h
+HAVE_STDINT_H:INTERNAL=1
+//Test HAVE_SYSTEM_ERROR
+HAVE_SYSTEM_ERROR:INTERNAL=1
+//Have include sys/types.h
+HAVE_SYS_TYPES_H:INTERNAL=1
+//Install location for documentation files
+INSTALL_DOC_DIR:INTERNAL=doc
+//Install location for include headers
+INSTALL_INCLUDE_DIR:INTERNAL=include
+//Library install location (relative to install root)
+INSTALL_LIB_DIR:INTERNAL=lib64
+//Install location for static libraries (relative to install root)
+INSTALL_LIB_DIR_STATIC:INTERNAL=lib64
+//version info
+JDBC_ABI_VERSION:INTERNAL=7.0
+//version info
+JDBC_ABI_VERSION_MAJOR:INTERNAL=7
+//version info
+JDBC_ABI_VERSION_MINOR:INTERNAL=0
+//ADVANCED property for variable: MYSQLCONNECTORCPP_INCLUDE_DIR
+MYSQLCONNECTORCPP_INCLUDE_DIR-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: MYSQLCONNECTORCPP_LIBRARY
+MYSQLCONNECTORCPP_LIBRARY-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: MYSQLCONNECTORCPP_ROOT_DIR
+MYSQLCONNECTORCPP_ROOT_DIR-ADVANCED:INTERNAL=1
+//Protobuf include path
+PROTOBUF_INCLUDE_DIRS:INTERNAL=/home/aliaksandr/sandbox/hlcup2017/mysql-connector-cpp/cdk/protobuf/protobuf-2.6.1/src
+//ADVANCED property for variable: PROTOBUF_LITE
+PROTOBUF_LITE-ADVANCED:INTERNAL=1
+//Protobuf compiler
+PROTOBUF_PROTOC_EXECUTABLE:INTERNAL=pb_protoc
+//CHECK_TYPE_SIZE: sizeof(long)
+SIZEOF_LONG:INTERNAL=8
+//CHECK_TYPE_SIZE: sizeof(long long)
+SIZEOF_LONG_LONG:INTERNAL=8
+SSL_DEFINES:INTERNAL=-DYASSL_PREFIX;-DMULTI_THREADED
+SSL_INCLUDES:INTERNAL=/home/aliaksandr/sandbox/hlcup2017/mysql-connector-cpp/cdk/extra/yassl/include;/home/aliaksandr/sandbox/hlcup2017/mysql-connector-cpp/cdk/extra/yassl/taocrypt/include;/home/aliaksandr/sandbox/hlcup2017/mysql-connector-cpp/cdk/extra/yassl/taocrypt/mySTL
+SSL_LIBRARIES:INTERNAL=yassl;taocrypt
 //Result of TRY_COMPILE
 THREADS_HAVE_PTHREAD_ARG:INTERNAL=TRUE
 //Result of TRY_RUN
 THREADS_PTHREAD_ARG:INTERNAL=2
+//ADVANCED property for variable: THROW_AS_ASSERT
+THROW_AS_ASSERT-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: UNREACHABLE_CODE_WARNINGS
+UNREACHABLE_CODE_WARNINGS-ADVANCED:INTERNAL=1
+//Tells whether bundled SSL implementation is used
+WITH_SSL_YASSL:INTERNAL=ON
 //Components requested for this build tree.
 _Boost_COMPONENTS_SEARCHED:INTERNAL=system
 //Last used Boost_INCLUDE_DIR value.
@@ -370,4 +602,22 @@ _Boost_LIBRARY_DIR_RELEASE_LAST:INTERNAL=/usr/lib/x86_64-linux-gnu
 _Boost_NAMESPACE_LAST:INTERNAL=boost
 //Last used Boost_USE_MULTITHREADED value.
 _Boost_USE_MULTITHREADED_LAST:INTERNAL=TRUE
+//CDK foundation target
+target_foundation:INTERNAL=cdk_foundation
+//CDK mysqlx target
+target_mysqlx:INTERNAL=cdk_mysqlx
+//CDK parser target
+target_parser:INTERNAL=cdk_parser
+//CDK proto_mysql target
+target_proto_mysqlx:INTERNAL=cdk_proto_mysqlx
+//global variable
+test_environment:INTERNAL=
+//global variable
+test_includes:INTERNAL=
+//global variable
+test_libs:INTERNAL=
+//global variable
+test_tests:INTERNAL=
+//Location of testing.cmake support files
+tests_dir:INTERNAL=/home/aliaksandr/sandbox/hlcup2017/mysql-connector-cpp/cdk/cmake/testing
 
