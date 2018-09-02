@@ -9,6 +9,8 @@
 using namespace sqlite;
 using namespace std;
 
+const double seconds_in_year = 31556926.0;
+
 namespace Sqlite {
     mutex storage_mutex;  // protects storage
 }
@@ -289,8 +291,6 @@ json SqliteCppStorage::userVisits(Id id, ConditionMap conditions) {
     }
     return visits;
 }
-
-const double seconds_in_year = 31556926.0;
 
 double SqliteCppStorage::locationAvgRate(Id id, ConditionMap conditions){
     try {

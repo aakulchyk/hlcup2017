@@ -37,6 +37,8 @@ private:
     void populateUsersTable();
     void populateLocationsTable();
     void populateVisitsTable();
+
+    bool checkRecordExists(std::string table, Id id);
     
 
     sql::Driver *driver;

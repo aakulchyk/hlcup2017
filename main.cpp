@@ -46,7 +46,7 @@ void client_session(socket_ptr sock) {
         std::string request(buf.data());
         auto requestType = UrlParser::instance().parse(request, id);
 
-        //std::cout << "REQUEST: " << std::endl << buf.data() << std::endl
+        //std::cout << "REQUEST: " << requestType << std::endl << buf.data() << std::endl
         //          << "---------------" << std::endl;
 
         switch (requestType) {
@@ -109,7 +109,7 @@ void client_session(socket_ptr sock) {
                 break;
             }
             case UrlParser::UPDATE_USER: {
-                std::cout << "update_user";
+                //std::cout << "update_user";
                 json user = json::parse(UrlParser::instance().extractJson(request));
                 
                 if (User::validate(user, false))
@@ -129,6 +129,7 @@ void client_session(socket_ptr sock) {
                 break;
             }
             case UrlParser::CREATE_USER: {
+                //std::cout << "create_user";
                 json user = json::parse(UrlParser::instance().extractJson(request));
                 code = storage->createUser(user) ? 200 : 400;
                 break;
@@ -159,6 +160,7 @@ void client_session(socket_ptr sock) {
        << std::endl << std::endl
        << dump;
 
+    //std::cout << "RESPONSE code " << code;
     //std::cout << std::endl << "RESPONSE: " << std::endl << ss.str() << std::endl
     //          << "---------------" << std::endl;;
 

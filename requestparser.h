@@ -135,15 +135,15 @@ public:
 private:
     UrlParser() {
         //regex_map[TEST] = "^TEST/[[:digit:]]+";
-        regex_map[GET_USER] = "^GET[[:space:]]/users/(\\w+)";
-        regex_map[GET_VISIT] = "^GET[[:space:]]/visits/(\\w+)";
-        regex_map[GET_LOCATION] = "^GET[[:space:]]/locations/(\\w+)";
+        regex_map[GET_USER] = "^GET[[:space:]]/users/([[:digit:]]+)";
+        regex_map[GET_VISIT] = "^GET[[:space:]]/visits/([[:digit:]]+)";
+        regex_map[GET_LOCATION] = "^GET[[:space:]]/locations/([[:digit:]]+)";
         regex_map[GET_USER_VISITS] = "^GET[[:space:]]/users/([[:digit:]]+)/visits";
-        regex_map[GET_LOCATION_AVG_RATE] = "^GET[[:space:]]/locations/(\\w+)/avg";
+        regex_map[GET_LOCATION_AVG_RATE] = "^GET[[:space:]]/locations/([[:digit:]]+)/avg";
 
-        regex_map[UPDATE_USER] = "POST[[:space:]]/users/(\\w+)";
-        regex_map[UPDATE_VISIT] = "POST[[:space:]]/visits/(\\w+)";
-        regex_map[UPDATE_LOCATION] = "POST[[:space:]]/locations/(\\w+)";
+        regex_map[UPDATE_USER] = "POST[[:space:]]/users/([[:digit:]]+)";
+        regex_map[UPDATE_VISIT] = "POST[[:space:]]/visits/([[:digit:]]+)";
+        regex_map[UPDATE_LOCATION] = "POST[[:space:]]/locations/([[:digit:]]+)";
 
         regex_map[CREATE_USER] = "POST[[:space:]]/users/new";
         regex_map[CREATE_VISIT] = "POST[[:space:]]/visits/new";

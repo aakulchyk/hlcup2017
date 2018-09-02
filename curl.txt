@@ -1,3 +1,7 @@
 curl -H "Content-Type: application/json" -X POST -d '{"email":"johndoe@gmail.com", "first_name": "Jessie", "last_name":"Pinkman", "birth_date":616550400}' localhost:2001/users/1
 curl -H "Content-Type: application/json" -X POST -d '{"country":"БЕЛАРУСЬ"}' localhost:2001/locations/1
 curl -H "Content-Type: application/json" -X POST -d '{"mark":13}' localhost:2001/visits/1
+
+CREATE:
+curl -H "Content-Type: application/json" -X POST -d '{"id":66666, "email":"johndoe@gmail.com", "first_name": "Jessie", "last_name":"Pinkman", "gender":"f", "birth_date":616550400}' localhost:2001/users/new
+curl -H "Content-Type: application/json" -X POST -d '{"id":66667, "email":"johndoe@gmail.com", "first_name": "Jessie", "last_name":"Pinkman", "gender":"f", "birth_date":616550400}' localhost:2001/users/new

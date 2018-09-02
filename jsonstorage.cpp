@@ -7,6 +7,8 @@
 #include <stdio.h>
 #include "storage.h"
 
+const double seconds_in_year = 31556926.0;
+
 std::mutex storage_mutex;  // protects storage
 
 void AbstractStorage::unzipData() {
@@ -124,9 +126,6 @@ json JsonStorage::userVisits(Id id, ConditionMap conditions)
 
     return visits;
 }
-
-
-const double seconds_in_year = 31556926.0;
 
 double JsonStorage::locationAvgRate(Id id, ConditionMap conditions)
 {
